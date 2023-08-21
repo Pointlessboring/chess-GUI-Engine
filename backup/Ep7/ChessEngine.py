@@ -20,7 +20,7 @@ class GameState():
             ["--", "--", "--", "--", "--", "--", "--", "--"],
             ["wp", "wp", "wp", "wp", "wp", "wp", 'wp', "wp"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", 'wN', "wR"]]
-           
+
         self.moveFunctions = {'p': self.getPawnMoves, 'R': self.getRookMoves, 'N': self.getKnightMoves,
                               'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves}
         self.whiteToMove = True
@@ -101,13 +101,12 @@ class GameState():
         else: #not in check so all moves are fine.
             moves = self.getAllPossibleMoves()
 
-        """ Uncomment to print possible moves
-        
+        """ Uncomment to print all possible moves
         for move in moves:
             print("=>" + move.getChessNotation())
         print("====")
         """
-
+        
         return moves
 
         
@@ -298,7 +297,7 @@ class GameState():
             for i in range(1, 8):
                 endRow = startRow + d[0] * i
                 endCol = startCol + d[1] * i
-                if 0 < endRow < 8 and 0< endCol <8:
+                if 0 <= endRow < 8 and 0 <= endCol < 8:
                     endPiece = self.board[endRow][endCol]
                     if endPiece[0] == allyColor and endPiece[1] != 'K': # Excludes King because of Quirk in getKingMoves
                         if possiblePin == (): 
