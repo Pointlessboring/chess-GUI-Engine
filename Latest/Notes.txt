@@ -21,3 +21,5 @@ Personal Notes:
         Perhaps even faster as it simplifies all move generation code.
 
         I will not implement it until the end of the series to stay current with his code.
+
+230822 - TODO: Create a new function to contain the mouse processing event.
