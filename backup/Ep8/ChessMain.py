@@ -67,6 +67,7 @@ def main():
                             
                     if not moveMade:
                         playerClicks = [sqSelected]
+                print("Move Log items:",len(gs.moveLog), "White to Play", gs.whiteToMove)
 
             #key handler
             elif e.type == p.KEYDOWN:
