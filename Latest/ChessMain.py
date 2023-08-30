@@ -1,15 +1,21 @@
 """
+This code was written following along this video series by Eddie Sharick: 
+https://www.youtube.com/watch?v=EnYui0e73Rs
+
 This is our main driver file. It is responsible for handling user input and displaying the current GameState object.
+
 """
 
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame as p
+from multiprocessing import Process, Queue
 import ChessEngine
 import ChessAI
-from multiprocessing import Process, Queue
 
 DIMENSION = 8                               
 BOARD_WIDTH = BOARD_HEIGHT = 512            
-MOVE_LOG_PANEL_WIDTH = 250
+MOVE_LOG_PANEL_WIDTH = 350
 MOVE_LOG_PANEL_HEIGHT = BOARD_HEIGHT
 SQ_SIZE = BOARD_HEIGHT // DIMENSION   
 MAX_FPS = 15                    # For animations later on
@@ -39,8 +45,8 @@ def main():
     sqSelected = ()         # (row, col) tuple. Keeps track of the last click of the user
     playerClicks = []       # keeps track of player clicks (two tuples: ex: [(6,4), (4,4)]
     gameOver = False        
-    playerOne = True        # True if Human, False if AI
-    playerTwo = False       # True if Human, False if AI
+    playerOne = False       # True if Human, False if AI
+    playerTwo = False      # True if Human, False if AI
     AIThinking = False
     moveFinderProcess = None
 
@@ -59,27 +65,29 @@ def main():
             # mouse handler
             elif e.type == p.MOUSEBUTTONDOWN:
                 if not gameOver:
-                    location = p.mouse.get_pos()            # (x,y) location of mouse
+                    location = p.mouse.get_pos() # (x,y) location of mouse
                     col = location[0]//SQ_SIZE
                     row = location[1]//SQ_SIZE
-                    if sqSelected == (row,col) or col > 7:  # did the user click the same square again or moveLog panel
-                        sqSelected = ()                     # deselect
-                        playerClicks = []                   # clear player clicks 
+                    if sqSelected == (row,col) or col >= DIMENSION:  
+                        sqSelected = ()          
+                        playerClicks = []        
                     else: 
                         sqSelected = (row, col)
-                        playerClicks.append(sqSelected)
-
-                    if len(playerClicks) == 2 and humanTurn:# after 2nd click
+                        if humanTurn:
+                            playerClicks.append(sqSelected)
+                        else:
+                            playerClicks = [sqSelected] # to cover case where player 2nd clicks during AI thinking
+                    if len(playerClicks) == 2 and humanTurn:    # after 2nd click
                         move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
                         for i in range(len(validMoves)):
                             if move == validMoves[i]:
                                 gs.makeMove(validMoves[i])
                                 moveMade = True
                                 animate = True
-                                sqSelected = () # Reset user clicks
+                                sqSelected = ()         
                                 playerClicks = []
-                        if not moveMade:                    # this 2nd click was not a valid move
-                            playerClicks = [sqSelected]     # 2nd click replaced 1st click
+                        if not moveMade:                
+                            playerClicks = [sqSelected] 
 
             #key handler
             elif e.type == p.KEYDOWN:
@@ -95,7 +103,7 @@ def main():
                         moveFinderProcess.terminate()
                         AIThinking = False
 
-                if e.key == p.K_r: #Reset the board when 'r' is pressed
+                if e.key == p.K_r: # reset the board when 'r' is pressed
                     gs = ChessEngine.GameState()
                     validMoves = gs.getValidMoves()
                     sqSelected = ()
@@ -112,11 +120,11 @@ def main():
         if not humanTurn and not gameOver and not moveUndone:
             if not AIThinking:
                 AIThinking = True 
-                returnQueue = Queue() #used to pass data between threads.
+                returnQueue = Queue() 
                 moveFinderProcess = Process(target=ChessAI.findBestMove, args=(gs, validMoves, returnQueue))
                 moveFinderProcess.start()
 
-            if moveFinderProcess.is_alive():
+            if not moveFinderProcess.is_alive():
                 AIMove = returnQueue.get()
                 if AIMove is None:  
                     AIMove = ChessAI.findRandomMove(validMoves)
@@ -135,7 +143,7 @@ def main():
 
 
         drawGameState(screen, gs, validMoves, sqSelected, moveLogFont)
-
+        
         if gs.checkmate or gs.stalemate:
             gameOver = True
             drawEndGameText(screen, 'Stalemate' if gs.stalemate else \
@@ -162,6 +170,14 @@ def drawBoard(screen):
 
 def highlightSquare(screen, gs, validMoves, sqSelected):
     """ Highlight square selected and moves for the piece selected """
+
+    # highlights the last move played in green
+    if (len(gs.moveLog)) > 0:
+        lastMove = gs.moveLog[-1]
+        s = p.Surface((SQ_SIZE, SQ_SIZE))
+        s.set_alpha(100)
+        s.fill(p.Color('green'))
+        screen.blit(s, (lastMove.endCol * SQ_SIZE, lastMove.endRow * SQ_SIZE))
 
     if sqSelected !=():
         r, c = sqSelected

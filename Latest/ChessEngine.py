@@ -21,6 +21,27 @@ class GameState():
             ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]]
 
+        # this sample board tests AI for stalemate and checkmate.
+        self.board = [
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["bP", "bP", "bP", "--", "--", "--", "--", "--"],
+            ["bK", "bB", "--", "--", "--", "--", "--", "bP"],
+            ["--", "--", "--", "--", "--", "--", "--", "bR"],
+            ["--", "wK", "--", "--", "--", "--", "--", "--"]]
+
+        self.board = [
+            ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
+            ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["wR", "--", "--", "--", "wK", "--", "--", "wR"]]
+
         self.moveFunctions = {'P': self.getPawnMoves, 'R': self.getRookMoves,
                               'N': self.getKnightMoves, 'B': self.getBishopMoves,
                               'Q': self.getQueenMoves, 'K': self.getKingMoves}
@@ -41,6 +62,26 @@ class GameState():
                                             self.currentCastlingRight.bks,
                                             self.currentCastlingRight.bqs)]
 
+        """
+        testing AI edge cases.
+        """
+        
+        self.board = [
+            ["bR", "--", "--", "--", "bK", "--", "--", "bR"],
+            ["bP", "bP", "bP", "--", "--", "bP", "bP", "bP"],
+            ["--", "--", "bN", "--", "--", "--", "--", "--"],
+            ["--", "--", "bB", "bP", "bP", "bB", "--", "--"],
+            ["--", "--", "--", "--", "bN", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "bQ", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "wK"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"]]
+        
+        self.currentCastlingRight = CastleRights(False, True, False, True) #while debugging
+        self.castleRightLog = [CastleRights(self.currentCastlingRight.wks,
+                                            self.currentCastlingRight.wqs,
+                                            self.currentCastlingRight.bks,
+                                            self.currentCastlingRight.bqs)]
+        
     def makeMove(self, move):
         """ Takes a move as a parameter and executes it. """
 
@@ -88,8 +129,6 @@ class GameState():
                                                 self.currentCastlingRight.bks,
                                                 self.currentCastlingRight.bqs))
     
-
-
     def undoMove(self):
         """ This function will undo the last move. """
 
@@ -210,7 +249,13 @@ class GameState():
                 for i in range (len(moves) -1, -1, -1):
                     if moves[i].pieceMoved[1] !='K':
                         if not (moves[i].endRow, moves[i].endCol) in validSquares: # move does not block check or capture checking piece
-                            moves.remove(moves[i])
+                            if moves[i].isEnpassantMove:
+                                capturedCol = moves[i].endCol
+                                capturedRow = moves[i].endRow + 1 if self.whiteToMove else moves[i].endRow-1
+                                if not (capturedRow,capturedCol) in validSquares:
+                                        moves.remove(moves[i])
+                            else:
+                                moves.remove(moves[i])
 
             else: # double check, king has to move
                 self.getKingMoves(kingRow, kingCol, moves)
@@ -238,6 +283,8 @@ class GameState():
         return moves
 
     def checkForPinsAndChecks(self):
+        """ This function identifies potential pins and checks. """
+
         pins = []
         checks = []
         inCheck = False
@@ -557,11 +604,13 @@ class CastleRights():
         self.bqs = bqs                                                          
 
 class Move():
-    # map keys to values
-    # key : value
+    """
+    This class is used to store information relative to a move along with code to display it. 
+    """
+    
+    # these will be used to translated from our (Row,Col) to chess notation
     ranksToRows = {"1": 7, "2": 6, "3": 5, "4": 4, "5": 3, "6": 2, "7": 1, "8": 0}
     rowsToRanks = {v:k for k, v in ranksToRows.items()}
-
     filesToCols = {"a": 0, "b": 1, "c": 2, "d": 3, "e": 4, "f": 5, "g": 6, "h": 7}
     colsToFiles = {v:k for k, v in filesToCols.items()}
 
@@ -578,7 +627,7 @@ class Move():
                                 (self.pieceMoved == 'bP' and self.endRow == 7 ) 
 
         self.isEnpassantMove = isEnpassantMove
-        if self.isEnpassantMove: # TODO: Is this the right place for this, or rather in the fn call?
+        if self.isEnpassantMove:
             self.pieceCaptured = "wP" if self.pieceMoved == "bP" else "bP"
 
         self.moveID = self.startRow * 1000 + self.startCol * 100 + self.endRow * 10 + self.endCol
@@ -597,8 +646,7 @@ class Move():
         if self.isCastleMove:
             return "O-O" if self.endCol == 6 else "O-O-O"
     
-        endSquare = self.getRankfile(self.endRow, self.endCol)
-
+        endSquare = self.colsToFiles[self.endCol] + self.rowsToRanks[self.endRow]
         #pawn moves
 
         if self.pieceMoved[1] == "P":
@@ -613,14 +661,3 @@ class Move():
                 moveString += 'x' 
             
             return moveString + endSquare
-
-            #TODO desambiguation if 2 pieces can go to same square. 
-            #TODO Add + for checks. Need some logic update as we only verify on opponents' move.
-            #TODO Add # for checkmates. Need some logic update as we only verify on opponents' move.
-
-    def getChessNotation(self):
-        return self.getRankfile(self.startRow, self.startCol) + self.getRankfile(self.endRow, self.endCol)
-
-
-    def getRankfile(self, r, c):
-        return self.colsToFiles[c] + self.rowsToRanks[r]

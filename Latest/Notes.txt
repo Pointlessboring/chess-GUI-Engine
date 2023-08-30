@@ -1,25 +1,9 @@
-Personal Notes:
+TODO:
 ===============
+0) TODO: Cleanup
+1) TODO: Add 3 fold repetition. 
+2) TODO: Add 50 move no capture draw rule.
+3) TODO: Notation: desambiguation if 2 pieces can go to same square. 
+4) TODO: Notation: Add + for checks. Need some logic update as we only verify on opponents' move.
+5) TODO: Notation: Add # for checkmates. Need some logic update as we only verify on opponents' move.
 
-230819: The code is Ep7 is complicated/less pleasing.
-        Instead of veriying for checks/pins why not simply generating the list
-        and then removing those that result in the king being in check.
-        This is more efficient than the initial "Naive" method.
-        Not sure that it is less efficient that the propose "Complicated" method.
-        
-        PseudoCode
-        ==========
-        1) moves = GetAllPossibleMoves()
-        2) save the GameState
-        3) for each move in moves:
-        4)      try the move
-        5)      if the king is in Check then:
-        6)              remove the move from moves
-        7)      reset the GameState
-        
-        This seems much simpler. 
-        Perhaps even faster as it simplifies all move generation code.
-
-        I will not implement it until the end of the series to stay current with his code.
-
-230822 - TODO: Create a new function to contain the mouse processing event.
