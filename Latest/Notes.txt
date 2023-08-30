@@ -1,6 +1,5 @@
 TODO:
 ===============
-0) TODO: Cleanup
 1) TODO: Add 3 fold repetition. 
 2) TODO: Add 50 move no capture draw rule.
 3) TODO: Notation: desambiguation if 2 pieces can go to same square. 

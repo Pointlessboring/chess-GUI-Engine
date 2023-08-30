@@ -21,27 +21,6 @@ class GameState():
             ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]]
 
-        # this sample board tests AI for stalemate and checkmate.
-        self.board = [
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["bP", "bP", "bP", "--", "--", "--", "--", "--"],
-            ["bK", "bB", "--", "--", "--", "--", "--", "bP"],
-            ["--", "--", "--", "--", "--", "--", "--", "bR"],
-            ["--", "wK", "--", "--", "--", "--", "--", "--"]]
-
-        self.board = [
-            ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
-            ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["--", "--", "--", "--", "--", "--", "--", "--"],
-            ["wR", "--", "--", "--", "wK", "--", "--", "wR"]]
-
         self.moveFunctions = {'P': self.getPawnMoves, 'R': self.getRookMoves,
                               'N': self.getKnightMoves, 'B': self.getBishopMoves,
                               'Q': self.getQueenMoves, 'K': self.getKingMoves}
@@ -64,7 +43,7 @@ class GameState():
 
         """
         testing AI edge cases.
-        """
+        Uncomment this and set-up your own test case.
         
         self.board = [
             ["bR", "--", "--", "--", "bK", "--", "--", "bR"],
@@ -81,7 +60,8 @@ class GameState():
                                             self.currentCastlingRight.wqs,
                                             self.currentCastlingRight.bks,
                                             self.currentCastlingRight.bqs)]
-        
+        """
+                                                    
     def makeMove(self, move):
         """ Takes a move as a parameter and executes it. """
 
